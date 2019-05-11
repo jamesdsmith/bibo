@@ -17,6 +17,7 @@ const int PULSE_BLINK = 13;
 const int PULSE_FADE = 5;
 const int THRESHOLD = 550;
 const int BPM_THRESHOLD = 100;
+const int TOTAL_TURNS = 2600;
 
 byte samplesUntilReport;
 const byte SAMPLES_PER_SERIAL_SAMPLE = 10;
@@ -26,6 +27,21 @@ IRSensor ir(SENSOR_PIN);
 MotorDriver motor(PIN_1, PIN_2);
 
 bool motorActive = true;
+bool motorIsIn = false;
+
+void motorIn() {
+  motorIsIn = true;
+  motor.CCW();
+  ir.waitForTicks(TOTAL_TURNS);
+  motor.Stop();
+}
+
+void motorOut() {
+  motorIsIn = false;
+  motor.CW();
+  ir.waitForTicks(TOTAL_TURNS);
+  motor.Stop();
+}
 
 void setup() {
   Serial.begin(115200);
@@ -48,29 +64,9 @@ void setup() {
       delay(50);
     }
   }
-  
-//  motor.CCW();
-//  ir.waitForTurns(1);
-//  motor.Stop();
-  //  motor.CW();
 }
 
 void loop() {
-  //  ir.sample();
-  //  if (ir.getTurnCount() > 1) {
-  //    motor.Stop();
-  //    motorActive = false;
-  //  }
-  //
-  //  if (motorActive) {
-  //    if (analogRead(DIRECTION_PIN) > 512) {
-  //      motor.CW();
-  //    } else {
-  //      motor.CCW();
-  //    }
-  //  }
-  //  delay(10);
-
   if (pulseSensor.sawNewSample()) {
     if (--samplesUntilReport == (byte) 0) {
       samplesUntilReport = SAMPLES_PER_SERIAL_SAMPLE;
@@ -88,9 +84,13 @@ void loop() {
     
     int bpm = pulseSensor.getBeatsPerMinute(0);
     if (bpm > BPM_THRESHOLD) {
-      motor.CCW();
+      if (motorIsIn) {
+        motorOut();
+      }
     } else {
-      motor.Stop();
+      if (!motorIsIn) {
+        motorIn();
+      }
     }
   }
 }

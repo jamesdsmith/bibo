@@ -7,7 +7,9 @@ public:
   IRSensor(int sensorPin);
   IRSensor(int sensorPin, int numWindows);
   void waitForTurns(float numTurns);
+  void waitForTicks(float numTicks);
   int getTurnCount();
+  int getTickCount();
   void sample();
 private:
   int numWindows;

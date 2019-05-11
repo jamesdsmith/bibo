@@ -24,6 +24,17 @@ void IRSensor::waitForTurns(float numTurns) {
   }
 }
 
+void IRSensor::waitForTicks(float numTicks) {
+  int tickCount = 0;
+  while(tickCount < numTicks) {
+    counter.input(digitalRead(sensorPin));
+    if (counter.changed()) {
+      tickCount++;
+    }
+    delay(1 / sampleRate * 1000);
+  }
+}
+
 void IRSensor::sample() {
   counter.input(digitalRead(sensorPin));
   if (counter.changed()) {
@@ -36,4 +47,8 @@ void IRSensor::sample() {
 
 int IRSensor::getTurnCount() {
   return this->turnCount;
+}
+
+int IRSensor::getTickCount() {
+  return this->tickCount;
 }
